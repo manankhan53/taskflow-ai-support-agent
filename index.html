@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>TaskFlow — AI Support Agent</title>
+<style>
+  :root{
+    --bg:#14171F;
+    --bg-soft:#1B1F2A;
+    --ink:#F2EFEA;
+    --ink-dim:#8B92A3;
+    --accent:#E8A14C;
+    --accent-dim:#4A3B24;
+    --line:#2A2F3C;
+    --green:#6FBF8B;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html{scroll-padding-top:env(safe-area-inset-top,0px);}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:-apple-system,"Inter",Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.5;
+    padding-top:env(safe-area-inset-top,0px);
+    padding-bottom:env(safe-area-inset-bottom,0px);
+    -webkit-font-smoothing:antialiased;
+  }
+  img{max-width:100%;}
+  a{color:inherit;}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 24px;}
+
+  header{
+    position:sticky;top:0;
+    padding:18px 0;
+    background:rgba(20,23,31,0.85);
+    backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--line);
+    z-index:10;
+    padding-top:calc(18px + env(safe-area-inset-top,0px));
+  }
+  header .wrap{display:flex;justify-content:space-between;align-items:center;}
+  .brand{font-weight:700;font-size:15px;letter-spacing:0.02em;}
+  .brand span{color:var(--accent);}
+  header nav a{
+    font-size:14px;color:var(--ink-dim);text-decoration:none;
+    border:1px solid var(--line);padding:8px 16px;border-radius:6px;
+  }
+  header nav a:hover{border-color:var(--accent);color:var(--ink);}
+
+  .hero{padding:86px 0 64px;}
+  .hero-grid{display:grid;grid-template-columns:1.1fr 1fr;gap:56px;align-items:center;}
+  @media(max-width:860px){.hero-grid{grid-template-columns:1fr;}}
+
+  .eyebrow{color:var(--accent);font-size:14px;font-weight:600;margin-bottom:18px;}
+  h1{
+    font-size:clamp(34px,5vw,52px);
+    line-height:1.08;
+    font-weight:700;
+    letter-spacing:-0.01em;
+    max-width:11ch;
+    margin-bottom:22px;
+  }
+  .hero p.lede{color:var(--ink-dim);font-size:18px;max-width:46ch;margin-bottom:32px;}
+  .cta-row{display:flex;gap:14px;flex-wrap:wrap;}
+  .btn{
+    display:inline-block;padding:13px 22px;border-radius:7px;
+    font-size:15px;font-weight:600;text-decoration:none;
+    transition:transform .15s ease;
+  }
+  .btn:hover{transform:translateY(-1px);}
+  .btn-primary{background:var(--accent);color:#1A1406;}
+  .btn-ghost{border:1px solid var(--line);color:var(--ink);}
+  .btn-ghost:hover{border-color:var(--accent);}
+
+  /* mock chat card */
+  .chat-card{
+    background:var(--bg-soft);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:20px;
+  }
+  .chat-card .tag{
+    font-size:12px;color:var(--ink-dim);margin-bottom:14px;
+    display:flex;justify-content:space-between;
+  }
+  .bubble{border-radius:10px;padding:12px 14px;font-size:14px;margin-bottom:10px;max-width:88%;}
+  .bubble.user{background:#242A38;margin-left:auto;color:var(--ink);}
+  .bubble.bot{background:var(--bg);border:1px solid var(--line);color:var(--ink);}
+  .bubble.bot .label{color:var(--accent);font-size:11px;font-weight:700;display:block;margin-bottom:4px;}
+  .bubble .status{color:var(--green);font-size:12px;font-weight:600;margin-top:8px;display:block;}
+
+  .video-embed{position:relative;width:100%;padding-top:56.25%;border-radius:12px;overflow:hidden;border:1px solid var(--line);}
+  .video-embed iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:0;}
+  .chat-embed{width:100%;height:600px;border-radius:12px;overflow:hidden;border:1px solid var(--line);}
+  .chat-embed iframe{width:100%;height:100%;border:0;display:block;}
+
+  section{padding:64px 0;border-top:1px solid var(--line);}
+  h2{font-size:clamp(24px,3vw,32px);font-weight:700;max-width:20ch;margin-bottom:18px;letter-spacing:-0.01em;}
+  section p.desc{color:var(--ink-dim);font-size:16px;max-width:60ch;margin-bottom:40px;}
+
+  .steps{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;}
+  @media(max-width:860px){.steps{grid-template-columns:1fr 1fr;}}
+  @media(max-width:520px){.steps{grid-template-columns:1fr;}}
+  .step .num{color:var(--accent);font-size:14px;font-weight:700;margin-bottom:10px;}
+  .step h3{font-size:17px;font-weight:600;margin-bottom:8px;}
+  .step p{color:var(--ink-dim);font-size:14px;}
+
+  .stack-row{display:flex;gap:40px;flex-wrap:wrap;}
+  .stack-item h3{font-size:16px;font-weight:700;margin-bottom:4px;}
+  .stack-item p{color:var(--ink-dim);font-size:14px;max-width:24ch;}
+
+  .checklist{display:grid;grid-template-columns:1fr 1fr;gap:14px 32px;}
+  @media(max-width:640px){.checklist{grid-template-columns:1fr;}}
+  .checklist li{list-style:none;display:flex;gap:10px;color:var(--ink-dim);font-size:15px;}
+  .checklist li::before{content:"✓";color:var(--green);font-weight:700;}
+
+  footer{padding:48px 0;border-top:1px solid var(--line);}
+  footer .wrap{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;}
+  footer p{color:var(--ink-dim);font-size:14px;max-width:52ch;}
+  footer a.gh{color:var(--accent);text-decoration:none;font-weight:600;font-size:14px;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="brand">TASKFLOW <span>SUPPORT AI</span></div>
+    <nav><a href="https://github.com/manankhan53/taskflow-ai-support-agent" target="_blank" rel="noopener">View the code</a></nav>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap hero-grid">
+    <div>
+      <div class="eyebrow">AI CUSTOMER SUPPORT AGENT</div>
+      <h1>Answers fast. Escalates honestly.</h1>
+      <p class="lede">An AI support agent for TaskFlow, a project management SaaS, that answers documented questions instantly and hands off to a human the moment it isn't sure — no guessing, no invented policy.</p>
+      <div class="cta-row">
+        <a class="btn btn-primary" href="#try">Talk to the agent</a>
+        <a class="btn btn-ghost" href="#how">See how it works</a>
+      </div>
+    </div>
+
+    <div class="chat-card">
+      <div class="tag"><span>TaskFlow Support</span><span>Live preview</span></div>
+      <div class="bubble user">How do I invite a team member?</div>
+      <div class="bubble bot">
+        <span class="label">ANSWERED FROM DOCS</span>
+        Go to Workspace Settings → Members → Invite Member. Enter their email and role, then send the invite.
+      </div>
+      <div class="bubble user">I was charged twice this month, can I get a refund?</div>
+      <div class="bubble bot">
+        <span class="label">ESCALATED</span>
+        I can't process refunds directly. I've logged this for our billing team to follow up.
+        <span class="status">Sent to Airtable ✓</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>Support bots that guess are worse than no bot at all.</h2>
+    <p class="desc">Most AI chatbots will confidently invent an answer rather than admit they don't know — which erodes trust faster than a slow human reply ever would. This system is built the opposite way: it only answers from TaskFlow's real documentation, and the moment a question touches billing, security, or anything it can't verify, it says so and routes the customer to a real person.</p>
+  </div>
+</section>
+
+<section id="demo">
+  <div class="wrap">
+    <h2>Watch it handle a real conversation</h2>
+    <p class="desc">One accurate answer, one honest escalation, and the record landing in Airtable — unscripted, recorded live.</p>
+    <div class="video-embed">
+      <iframe src="https://www.youtube.com/embed/Y9EK6LU_fBg" title="TaskFlow AI Support Agent Demo" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+    </div>
+  </div>
+</section>
+
+<section id="try">
+  <div class="wrap">
+    <h2>Try it yourself</h2>
+    <p class="desc">This is the live agent, connected to the real knowledge base. Ask it anything a TaskFlow customer might ask.</p>
+    <div class="chat-embed">
+      <iframe src="https://udify.app/chatbot/VcvllA163Y0Ktuln" style="width:100%;height:100%;min-height:600px;" frameborder="0" allow="microphone;clipboard-write"></iframe>
+    </div>
+  </div>
+</section>
+
+<section id="how">
+  <div class="wrap">
+    <h2>How it works</h2>
+    <p class="desc">One question, four possible outcomes — all handled without a human touching it, unless a human is actually needed.</p>
+    <div class="steps">
+      <div class="step">
+        <div class="num">01</div>
+        <h3>Question comes in</h3>
+        <p>The customer asks anything — a how-to, a billing question, a bug report, or something unrelated entirely.</p>
+      </div>
+      <div class="step">
+        <div class="num">02</div>
+        <h3>Knowledge is retrieved</h3>
+        <p>Dify searches TaskFlow's help documentation using hybrid semantic + keyword search, ranked by relevance.</p>
+      </div>
+      <div class="step">
+        <div class="num">03</div>
+        <h3>Answer or escalate</h3>
+        <p>If the docs clearly cover it, the AI answers. If it's billing, security, a bug, or unclear — it escalates instead of guessing.</p>
+      </div>
+      <div class="step">
+        <div class="num">04</div>
+        <h3>Human gets the details</h3>
+        <p>Escalations are logged straight into Airtable through a simple handoff form, ready for the support team to follow up.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>Built with</h2>
+    <div class="stack-row">
+      <div class="stack-item">
+        <h3>Dify</h3>
+        <p>Knowledge base, RAG retrieval, and the conversational AI layer</p>
+      </div>
+      <div class="stack-item">
+        <h3>OpenAI</h3>
+        <p>text-embedding-3-small for semantic search, GPT for responses</p>
+      </div>
+      <div class="stack-item">
+        <h3>Airtable</h3>
+        <p>Escalation log and the customer-facing handoff form</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>Tested against the messy questions, not just the easy ones</h2>
+    <ul class="checklist">
+      <li>Documented how-to questions — answered accurately from source content</li>
+      <li>Billing and refund requests — escalated, never resolved by the AI</li>
+      <li>Questions with no documented answer — admits it, doesn't invent one</li>
+      <li>Off-topic questions — declined and redirected, not answered</li>
+      <li>Frustrated tone — troubleshoots calmly before escalating, no contradictions</li>
+      <li>Vague reports ("it's not working") — asks a clarifying question, doesn't guess</li>
+    </ul>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p>This is a portfolio project built to demonstrate a working RAG support-agent pipeline. TaskFlow is a fictional demo business, not a live product.</p>
+    <a class="gh" href="https://github.com/manankhan53/taskflow-ai-support-agent" target="_blank" rel="noopener">View the full build on GitHub →</a>
+  </div>
+</footer>
+
+</body>
+</html>
